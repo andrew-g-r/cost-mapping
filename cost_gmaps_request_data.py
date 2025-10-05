@@ -2,15 +2,17 @@ import numpy as np
 import json
 from pathlib import Path
 import googlemaps
+import os
+import os
 
 #googlemaps api key
-gmaps = googlemaps.Client(key='AIzaSyBqERDKGUinc-sQi_IO9G1bCIRtxUyz4bU', timeout=.5)
+gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAPS_API_KEY'], timeout=.5)
 
 #directories
 file_dir = '/data/limited_grid/'
 data_dir = '/data/'
 
-#bounds of our grid 
+#bounds of our grid
 xbounds1 = 29.979508
 xbounds2 = 30.660661
 ybounds1 = -97.980544
@@ -43,7 +45,7 @@ for i in range(16):
     for p in range(16):
         gridpoints.append([x[p], y[i]])
 #the jumps or trips for the data
-grid_jumps = []            
+grid_jumps = []
 for i in gridpoints:
     grid_jumps.append((current_coordinates, i, current_coordinates))
 #save a file for later use
@@ -71,7 +73,7 @@ for i in grid_jumps:
             json.dump(results, outfile)
         print('created file:\n{}'.format(file_dir + filename + '_results.json'))
     #do not make requests as fast as programmatically possible
-    time.sleep(1)            
+    time.sleep(1)
 
 #pulling the requests data to populate the data for the Z axis
 for i in gridpoints:
@@ -90,6 +92,6 @@ for i in gridpoints:
         duration = (p['duration']['value']/60)
 
     Z[indexY][indexX] = distance
-    
+
 with open(data_dir+'Z_array.json', 'w') as outfile:
         json.dump(Z, outfile)

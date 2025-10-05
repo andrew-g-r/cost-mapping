@@ -20,10 +20,12 @@ Googlemaps or another api like mapbox can provide this information in real time.
 
 ```javascript
 import googlemaps
+import os
+import os
 import json
 
 #using our googlemaps API key
-gmaps = googlemaps.Client(key='AIzaSyBqERDKGUinc-sQi_IO9G1bCIRtxUyz4bU')
+gmaps = googlemaps.Client(key=os.environ['GOOGLE_MAPS_API_KEY'])
 
 current_coordinates = [30.300501, -97.748948]
 address_coordinates = []
