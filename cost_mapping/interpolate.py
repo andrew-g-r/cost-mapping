@@ -14,3 +14,12 @@ def interpolate(surface, point):
     a,b=surface.values[row][column:column+2]
     c,d=surface.values[row+1][column:column+2]
     return (1-dy)*((1-dx)*a+dx*b)+dy*((1-dx)*c+dx*d)
+
+
+def resample(surface, rows=48, columns=48):
+    from .grid import Grid
+    from .dataset import Surface
+    old=surface.grid
+    grid=Grid(old.south,old.west,old.north,old.east,rows,columns)
+    values=[[interpolate(surface,Point(lat,lon)) for lon in grid.longitudes] for lat in grid.latitudes]
+    return Surface(grid,values,surface.unit,surface.source+'; bilinear resampling (not additional observations)')
