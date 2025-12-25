@@ -1,0 +1,4 @@
+name,payout,miles,driving_minutes,work_minutes,waiting_minutes,tolls,parking
+Downtown delivery,24,8,22,8,5,0,2
+Airport pickup,48,28,48,5,10,3,0
+Neighborhood errand,16,3,10,15,0,0,0
