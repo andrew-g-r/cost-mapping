@@ -6,6 +6,11 @@ import unittest
 class CLITests(unittest.TestCase):
     def cli(self,*args):
         return subprocess.run([sys.executable,'-m','cost_mapping',*args],text=True,capture_output=True)
+    def test_comparison_ranks_by_earnings(self):
+        result=self.cli('compare','examples/gigs.csv')
+        self.assertEqual(result.returncode,0,result.stderr)
+        values=[row['effective_hourly'] for row in json.loads(result.stdout)]
+        self.assertEqual(values,sorted(values,reverse=True))
     def test_evaluate_and_bad_input(self):
         args=['evaluate','--payout','30','--miles','10','--driving-minutes','30']
         result=self.cli(*args)

@@ -23,12 +23,20 @@ def parser():
     commands=root.add_subparsers(dest='command',required=True)
     single=commands.add_parser('evaluate',help='Evaluate a gig')
     add_gig(single)
+    compare=commands.add_parser('compare',help='Rank gigs from a CSV file')
+    compare.add_argument('source')
+    compare.add_argument('--sort',choices=['effective_hourly','net_earnings','surplus'],default='effective_hourly')
+    add_assumptions(compare)
     return root
 
 def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='compare':
+        from .imports import load_gigs
+        assumptions=Assumptions(args.cost_per_mile,args.target_hourly)
+        return sorted([evaluate(gig,assumptions) for gig in load_gigs(args.source)],key=lambda row:row[args.sort],reverse=True)
     if args.command=='evaluate':
         return evaluate(gig_from_args(args),Assumptions(args.cost_per_mile,args.target_hourly))
     raise ValueError('Unknown command')
