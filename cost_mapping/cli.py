@@ -27,12 +27,17 @@ def parser():
     compare.add_argument('source')
     compare.add_argument('--sort',choices=['effective_hourly','net_earnings','surplus'],default='effective_hourly')
     add_assumptions(compare)
+    scenarios=commands.add_parser('scenarios',help='Compare lower/base/higher driving cost and time')
+    add_gig(scenarios)
     return root
 
 def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='scenarios':
+        from .scenarios import sensitivity
+        return sensitivity(gig_from_args(args),Assumptions(args.cost_per_mile,args.target_hourly))
     if args.command=='compare':
         from .imports import load_gigs
         assumptions=Assumptions(args.cost_per_mile,args.target_hourly)
