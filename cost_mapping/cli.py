@@ -39,12 +39,31 @@ def parser():
     route.add_argument('--avoid-tolls',action='store_true')
     route.add_argument('--max-requests',type=int,default=2)
     route.add_argument('--dry-run',action='store_true')
+    commands.add_parser('sample',help='Export the bundled legacy Austin surface')
+    query=commands.add_parser('query',help='Interpolate a value inside a surface')
+    query.add_argument('source')
+    query.add_argument('--point',required=True)
+    resample=commands.add_parser('resample',help='Resample a surface without extrapolation')
+    resample.add_argument('source')
+    resample.add_argument('--rows',type=int,default=48)
+    resample.add_argument('--columns',type=int,default=48)
     return root
 
 def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='sample':
+        from .samples import sample_surface
+        return sample_surface().to_dict()
+    if args.command in ('query','resample'):
+        from .dataset import load_surface
+        from .interpolate import interpolate, resample
+        from .geo import Point
+        surface=load_surface(args.source)
+        if args.command=='query':
+            return {'value':interpolate(surface,Point.parse(args.point)), 'unit':surface.unit, 'source':surface.source}
+        return resample(surface,args.rows,args.columns).to_dict()
     if args.command=='route':
         from dataclasses import asdict
         from .geo import Point
