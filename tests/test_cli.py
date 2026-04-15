@@ -6,6 +6,10 @@ import unittest
 class CLITests(unittest.TestCase):
     def cli(self,*args):
         return subprocess.run([sys.executable,'-m','cost_mapping',*args],text=True,capture_output=True)
+    def test_live_route_dry_run_needs_no_key(self):
+        result=self.cli('route','--origin','30,-97','--destination','30.1,-97.1','--provider','google','--round-trip','--dry-run')
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(json.loads(result.stdout)['requests'],2)
     def test_comparison_ranks_by_earnings(self):
         result=self.cli('compare','examples/gigs.csv')
         self.assertEqual(result.returncode,0,result.stderr)

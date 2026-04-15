@@ -29,12 +29,37 @@ def parser():
     add_assumptions(compare)
     scenarios=commands.add_parser('scenarios',help='Compare lower/base/higher driving cost and time')
     add_gig(scenarios)
+    route=commands.add_parser('route',help='Estimate a route offline or request Google routing')
+    route.add_argument('--origin',required=True,help='latitude,longitude')
+    route.add_argument('--destination',required=True,help='latitude,longitude')
+    route.add_argument('--provider',choices=['offline','google'],default='offline')
+    route.add_argument('--round-trip',action='store_true')
+    route.add_argument('--speed-mph',type=float,default=25)
+    route.add_argument('--road-factor',type=float,default=1.3)
+    route.add_argument('--avoid-tolls',action='store_true')
+    route.add_argument('--max-requests',type=int,default=2)
+    route.add_argument('--dry-run',action='store_true')
     return root
 
 def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='route':
+        from dataclasses import asdict
+        from .geo import Point
+        from .offline import estimate_route
+        from .google import google_route
+        from .collect import RequestBudget, round_trip
+        from .units import miles, minutes
+        origin,destination=Point.parse(args.origin),Point.parse(args.destination)
+        count=2 if args.round_trip else 1
+        budget=RequestBudget(args.max_requests)
+        if count>budget.limit: raise ValueError('Request limit is smaller than the planned route count')
+        if args.dry_run: return {'provider':args.provider,'requests':count if args.provider=='google' else 0,'round_trip':args.round_trip}
+        provider=(lambda a,b: google_route(a,b,avoid_tolls=args.avoid_tolls)) if args.provider=='google' else (lambda a,b:estimate_route(a,b,speed_mph=args.speed_mph,road_factor=args.road_factor))
+        result=round_trip(origin,destination,provider,budget=budget) if args.round_trip else budget.call(provider,origin,destination)
+        return {**asdict(result),'miles':miles(result.meters,'meters'),'minutes':minutes(result.seconds,'seconds'),'requests':budget.used if args.provider=='google' else 0}
     if args.command=='scenarios':
         from .scenarios import sensitivity
         return sensitivity(gig_from_args(args),Assumptions(args.cost_per_mile,args.target_hourly))
