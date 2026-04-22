@@ -47,6 +47,9 @@ def parser():
     resample.add_argument('source')
     resample.add_argument('--rows',type=int,default=48)
     resample.add_argument('--columns',type=int,default=48)
+    for command in commands.choices.values():
+        command.add_argument('--output',help='Write output atomically to a file')
+        command.add_argument('--force',action='store_true',help='Replace an existing output file')
     return root
 
 def gig_from_args(args):
@@ -95,7 +98,12 @@ def main(argv=None):
     args=root.parse_args(argv)
     try:
         result=execute(args)
-        if result is not None: print(json.dumps(result,ensure_ascii=False,indent=2,allow_nan=False))
+        if result is not None:
+            output=result if isinstance(result,str) else json.dumps(result,ensure_ascii=False,indent=2,allow_nan=False)
+            if args.output:
+                from .files import save
+                save(args.output,output,force=args.force)
+            else: print(output)
         return 0
     except BrokenPipeError:
         return 0
