@@ -57,6 +57,14 @@ def parser():
     collect.add_argument('--speed-mph',type=float,default=25)
     collect.add_argument('--road-factor',type=float,default=1.3)
     collect.add_argument('--cache',help='Optional SQLite cache for synthetic routes')
+    export=commands.add_parser('export',help='Export surface points as CSV or GeoJSON')
+    export.add_argument('source')
+    export.add_argument('--format',choices=['csv','geojson'],default='geojson')
+    reach=commands.add_parser('reach',help='List sampled locations within a budget in the surface unit')
+    reach.add_argument('source')
+    reach.add_argument('--budget',required=True,type=float)
+    info=commands.add_parser('inspect',help='Summarize a surface and its provenance')
+    info.add_argument('source')
     for command in commands.choices.values():
         command.add_argument('--output',help='Write output atomically to a file')
         command.add_argument('--force',action='store_true',help='Replace an existing output file')
@@ -66,6 +74,14 @@ def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command in ('export','reach','inspect'):
+        from .dataset import load_surface
+        from .export import csv_surface, geojson_surface
+        from .reach import within_budget, describe
+        surface=load_surface(args.source)
+        if args.command=='inspect': return describe(surface)
+        if args.command=='reach': return within_budget(surface,args.budget)
+        return csv_surface(surface) if args.format=='csv' else geojson_surface(surface)
     if args.command=='collect':
         from .grid import Grid
         from .geo import Point
