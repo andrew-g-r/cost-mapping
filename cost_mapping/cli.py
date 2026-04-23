@@ -47,6 +47,16 @@ def parser():
     resample.add_argument('source')
     resample.add_argument('--rows',type=int,default=48)
     resample.add_argument('--columns',type=int,default=48)
+    collect=commands.add_parser('collect',help='Build an offline estimated cost surface')
+    collect.add_argument('--origin',required=True)
+    collect.add_argument('--bounds',nargs=4,type=float,required=True,metavar=('SOUTH','WEST','NORTH','EAST'))
+    collect.add_argument('--rows',type=int,default=16)
+    collect.add_argument('--columns',type=int,default=16)
+    collect.add_argument('--metric',choices=['miles','minutes'],default='miles')
+    collect.add_argument('--round-trip',action='store_true')
+    collect.add_argument('--speed-mph',type=float,default=25)
+    collect.add_argument('--road-factor',type=float,default=1.3)
+    collect.add_argument('--cache',help='Optional SQLite cache for synthetic routes')
     for command in commands.choices.values():
         command.add_argument('--output',help='Write output atomically to a file')
         command.add_argument('--force',action='store_true',help='Replace an existing output file')
@@ -56,6 +66,14 @@ def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='collect':
+        from .grid import Grid
+        from .geo import Point
+        from .sampling import sample_grid
+        from .cache import RouteCache
+        grid=Grid(*args.bounds,args.rows,args.columns)
+        cache=RouteCache(args.cache) if args.cache else None
+        return sample_grid(grid,Point.parse(args.origin),speed_mph=args.speed_mph,road_factor=args.road_factor,metric=args.metric,round_trip=args.round_trip,cache=cache).to_dict()
     if args.command=='sample':
         from .samples import sample_surface
         return sample_surface().to_dict()
