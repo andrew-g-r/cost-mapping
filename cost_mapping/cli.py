@@ -65,6 +65,9 @@ def parser():
     reach.add_argument('--budget',required=True,type=float)
     info=commands.add_parser('inspect',help='Summarize a surface and its provenance')
     info.add_argument('source')
+    plot=commands.add_parser('plot',help='Render an optional Matplotlib plot')
+    plot.add_argument('source')
+    plot.add_argument('--kind',choices=['heatmap','surface'],default='heatmap')
     for command in commands.choices.values():
         command.add_argument('--output',help='Write output atomically to a file')
         command.add_argument('--force',action='store_true',help='Replace an existing output file')
@@ -74,6 +77,14 @@ def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='plot':
+        from .dataset import load_surface
+        from .plot import plot_surface
+        from pathlib import Path
+        if not args.output: raise ValueError('Plot requires --output image.png (or .svg/.pdf)')
+        if Path(args.output).exists() and not args.force: raise ValueError('Plot output already exists; use --force to replace it')
+        plot_surface(load_surface(args.source),args.output,kind=args.kind)
+        return None
     if args.command in ('export','reach','inspect'):
         from .dataset import load_surface
         from .export import csv_surface, geojson_surface
