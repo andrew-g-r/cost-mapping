@@ -68,6 +68,8 @@ def parser():
     plot=commands.add_parser('plot',help='Render an optional Matplotlib plot')
     plot.add_argument('source')
     plot.add_argument('--kind',choices=['heatmap','surface'],default='heatmap')
+    server=commands.add_parser('serve',help='Start the local trip-economics calculator')
+    server.add_argument('--port',type=int,default=8766)
     for command in commands.choices.values():
         command.add_argument('--output',help='Write output atomically to a file')
         command.add_argument('--force',action='store_true',help='Replace an existing output file')
@@ -77,6 +79,11 @@ def gig_from_args(args):
     return Gig(**{field:getattr(args,field) for field in Gig.__dataclass_fields__})
 
 def execute(args):
+    if args.command=='serve':
+        from .web import serve
+        if not 0<=args.port<=65535: raise ValueError('Port must be between 0 and 65535')
+        serve(args.port)
+        return None
     if args.command=='plot':
         from .dataset import load_surface
         from .plot import plot_surface
