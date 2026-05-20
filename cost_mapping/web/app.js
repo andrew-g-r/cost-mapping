@@ -35,3 +35,28 @@ form.addEventListener('submit',async event=>{
   catch(error){status.textContent=error.message;}
   finally{button.disabled=false;}
 });
+
+const compared=[];
+function table(headers,rows){
+  const item=element('table');const head=element('thead');const top=element('tr');
+  headers.forEach(value=>top.append(element('th',value)));head.append(top);item.append(head);
+  const body=element('tbody');for(const values of rows){const row=element('tr');values.forEach(value=>row.append(element('td',value)));body.append(row);}item.append(body);return item;
+}
+document.querySelector('#scenarios').addEventListener('click',async()=>{
+  try{
+    if(!lastPayload)throw new Error('Calculate a trip first.');
+    const response=await fetch('/api/scenarios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastPayload)});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||'Scenario calculation failed');
+    document.querySelector('#scenario-results').replaceChildren(element('h3','Driving uncertainty: ±20%'),table(['Cost factor','Driving time factor','Hourly earnings'],data.map(row=>[`${row.cost_factor}×`,`${row.driving_time_factor}×`,money(row.effective_hourly)])));
+  }catch(error){status.textContent=error.message;}
+});
+function showComparison(){
+  const sorted=[...compared].sort((a,b)=>b.effective_hourly-a.effective_hourly);
+  document.querySelector('#comparison-table').replaceChildren(table(['Trip','Net earnings','Hourly','Meets target'],sorted.map(row=>[row.name,money(row.net_earnings),money(row.effective_hourly),row.meets_target?'Yes':'No'])));
+}
+document.querySelector('#remember').addEventListener('click',()=>{
+  if(!latest){status.textContent='Calculate a trip first.';return;}
+  if(compared.length>=50){status.textContent='Compare up to 50 trips. Clear the list to start again.';return;}
+  compared.push({...latest});showComparison();status.textContent='Trip added to comparison.';
+});
+document.querySelector('#clear-comparison').addEventListener('click',()=>{compared.length=0;showComparison();});
