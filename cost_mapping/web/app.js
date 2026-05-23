@@ -60,3 +60,22 @@ document.querySelector('#remember').addEventListener('click',()=>{
   compared.push({...latest});showComparison();status.textContent='Trip added to comparison.';
 });
 document.querySelector('#clear-comparison').addEventListener('click',()=>{compared.length=0;showComparison();});
+
+document.querySelector('#download').addEventListener('click',()=>{
+  if(!latest){status.textContent='Calculate a trip first.';return;}
+  const report={schema_version:1,inputs:lastPayload,result:latest,comparison:compared};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));
+  const link=element('a');link.href=url;link.download='trip-report.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+document.querySelector('#save-inputs').addEventListener('click',()=>{
+  try{localStorage.setItem('cost-mapping-assumptions-v1',JSON.stringify(payload().assumptions));status.textContent='Assumptions saved in this browser.';}
+  catch(error){status.textContent=error.message;}
+});
+document.querySelector('#forget-inputs').addEventListener('click',()=>{
+  try{localStorage.removeItem('cost-mapping-assumptions-v1');status.textContent='Saved assumptions removed.';}
+  catch(error){status.textContent=error.message;}
+});
+try{
+  const saved=JSON.parse(localStorage.getItem('cost-mapping-assumptions-v1')||'null');
+  if(saved)for(const key of ['cost_per_mile','target_hourly'])if(Number.isFinite(saved[key])&&saved[key]>=0)form.elements[key].value=saved[key];
+}catch{status.textContent='Saved assumptions could not be read; defaults are shown.';}
