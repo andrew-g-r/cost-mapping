@@ -64,7 +64,7 @@ cost-mapping plot legacy.json --kind surface --output surface.png
 
 The packaged Austin data comes from the original 2021 array. It has been transposed into the documented axis order and preserves the original exclusive upper bounds. **Its collection accuracy and trip direction are unverified**; use it as a historical demonstration, not a current travel estimate. The original `Z_array.json` remains available.
 
-Plotting uses Matplotlib 3.10+; PNG, SVG and PDF output are supported. The removed SciPy `interp2d` API and the Google Maps Python client are no longer runtime dependencies. The old script filenames now delegate to explicit CLI commands and do nothing when imported.
+Plotting uses Matplotlib 3.11.2+; PNG, SVG and PDF output are supported. The removed SciPy `interp2d` API and the Google Maps Python client are no longer runtime dependencies. The old script filenames now delegate to explicit CLI commands and do nothing when imported.
 
 ## Files, development, and project scope
 

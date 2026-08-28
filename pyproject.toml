@@ -15,10 +15,11 @@ dependencies = []
 cost-mapping = "cost_mapping.cli:main"
 
 [project.optional-dependencies]
-plot = ["matplotlib>=3.10,<4"]
+plot = ["matplotlib>=3.11.2,<4"]
 
 [tool.setuptools]
 packages = ["cost_mapping"]
+include-package-data = false
 
 [tool.setuptools.package-data]
 cost_mapping = ["data/*.json", "web/*.html", "web/*.css", "web/*.js"]
