@@ -14,6 +14,9 @@ class EconomicsTests(unittest.TestCase):
         second=evaluate(Gig('A',20,5,30,waiting_minutes=30))
         self.assertEqual(first['cash_cost'],second['cash_cost'])
         self.assertEqual(first['effective_hourly']/2,second['effective_hourly'])
+    def test_overflow_is_reported_instead_of_serialized(self):
+        with self.assertRaises(ValueError):
+            evaluate(Gig('Huge',1,1e308,1),Assumptions(1e308,20))
     def test_zero_time_negative_values_and_nan(self):
         for args in [('A',10,1,0),('A',10,-1,1),('A',float('nan'),1,1)]:
             with self.assertRaises(ValueError): Gig(*args)

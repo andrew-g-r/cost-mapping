@@ -20,6 +20,11 @@ class WebTests(unittest.TestCase):
     def test_known_calculation_over_http(self):
         with urlopen(self.request({'gig':{'name':'A','payout':30,'miles':10,'driving_minutes':30}}),timeout=5) as response:
             self.assertEqual(json.load(response)['net_earnings'],27)
+    def test_static_assets_are_packaged_and_served(self):
+        for asset in ['/', '/app.js', '/style.css']:
+            with urlopen(self.url+asset,timeout=5) as response:
+                self.assertEqual(response.status,200)
+                self.assertEqual(response.headers['X-Content-Type-Options'],'nosniff')
     def test_bad_data_and_cross_origin(self):
         for request in [self.request({'gig':{}}),self.request({},Origin='https://evil.example')]:
             try: urlopen(request,timeout=5)

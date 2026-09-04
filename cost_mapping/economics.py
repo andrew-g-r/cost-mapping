@@ -35,6 +35,8 @@ def evaluate(gig, assumptions=None):
     expenses=vehicle+gig.tolls+gig.parking
     net=gig.payout-expenses
     time_value=minutes/60*assumptions.target_hourly
+    for label,value in [('total time',minutes),('cash cost',expenses),('net earnings',net),('time value',time_value),('hourly earnings',net/(minutes/60))]:
+        finite(value,label)
     return {'name':gig.name,'payout':gig.payout,'miles':gig.miles,'total_minutes':minutes,
             'vehicle_cost':vehicle,'cash_cost':expenses,'net_earnings':net,
             'effective_hourly':net/(minutes/60),'target_time_value':time_value,
