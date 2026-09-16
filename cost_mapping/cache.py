@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import sqlite3
 import time
+from contextlib import contextmanager, closing
 from .routes import Route
 from .geo import finite
 
@@ -14,8 +15,11 @@ class RouteCache:
         self.ttl,self.clock=ttl,clock
         with self.connect() as db:
             db.execute('CREATE TABLE IF NOT EXISTS routes (key TEXT PRIMARY KEY, created REAL NOT NULL, value TEXT NOT NULL)')
+    @contextmanager
     def connect(self):
-        return sqlite3.connect(self.path,timeout=5)
+        with closing(sqlite3.connect(self.path,timeout=5)) as db:
+            with db:
+                yield db
     def get(self,key):
         with self.connect() as db:
             row=db.execute('SELECT created,value FROM routes WHERE key=?',(key,)).fetchone()
