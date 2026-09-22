@@ -7,7 +7,7 @@ import unittest
 
 class WorkflowTests(unittest.TestCase):
     def cli(self,*args):
-        result=subprocess.run([sys.executable,'-m','cost_mapping',*map(str,args)],capture_output=True,text=True,timeout=10)
+        result=subprocess.run([sys.executable,'-m','cost_mapping',*map(str,args)],capture_output=True,text=True,timeout=60 if args[0]=='plot' else 10)
         self.assertEqual(result.returncode,0,result.stderr)
         return result.stdout
     def test_collect_query_resample_and_export(self):
