@@ -42,13 +42,22 @@ def evaluate(gig, assumptions=None):
     vehicle = gig.miles * assumptions.cost_per_mile
     expenses = vehicle + gig.tolls + gig.parking
     net = gig.payout - expenses
-    time_value = minutes / 60 * assumptions.target_hourly
+    hours = minutes / 60
+    finite(hours, 'total hours')
+    if hours <= 0:
+        raise ValueError('Total duration is too small to calculate hourly earnings')
+    hourly = net / hours
+    time_value = hours * assumptions.target_hourly
+    minimum_payout = expenses + time_value
+    surplus = net - time_value
     for label, value in [
         ("total time", minutes),
         ("cash cost", expenses),
         ("net earnings", net),
         ("time value", time_value),
-        ("hourly earnings", net / (minutes / 60)),
+        ("hourly earnings", hourly),
+        ("minimum payout", minimum_payout),
+        ("surplus", surplus),
     ]:
         finite(value, label)
     return {
@@ -59,9 +68,9 @@ def evaluate(gig, assumptions=None):
         "vehicle_cost": vehicle,
         "cash_cost": expenses,
         "net_earnings": net,
-        "effective_hourly": net / (minutes / 60),
+        "effective_hourly": hourly,
         "target_time_value": time_value,
-        "minimum_payout": expenses + time_value,
-        "surplus": net - time_value,
+        "minimum_payout": minimum_payout,
+        "surplus": surplus,
         "meets_target": net >= time_value,
     }

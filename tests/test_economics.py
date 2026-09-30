@@ -20,6 +20,12 @@ class EconomicsTests(unittest.TestCase):
         self.assertEqual(first["cash_cost"], second["cash_cost"])
         self.assertEqual(first["effective_hourly"] / 2, second["effective_hourly"])
 
+    def test_underflow_and_combined_cost_overflow_are_rejected(self):
+        with self.assertRaises(ValueError):
+            evaluate(Gig('Tiny',1,1,5e-324))
+        with self.assertRaises(ValueError):
+            evaluate(Gig('Huge',1e308,1,60),Assumptions(1e308,1e308))
+
     def test_overflow_is_reported_instead_of_serialized(self):
         with self.assertRaises(ValueError):
             evaluate(Gig("Huge", 1, 1e308, 1), Assumptions(1e308, 20))
