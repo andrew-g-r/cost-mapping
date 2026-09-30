@@ -23,6 +23,16 @@ class GoogleTests(unittest.TestCase):
             json.loads(requests[0].data)["origin"]["location"]["latLng"]["latitude"], 1
         )
 
+    def test_provider_errors_close_the_body_without_echoing_credentials(self):
+        from urllib.error import HTTPError
+        body=io.BytesIO(b'sensitive provider response')
+        def opener(request,timeout):
+            raise HTTPError(request.full_url,429,'rate limited',{},body)
+        with self.assertRaisesRegex(ValueError,'HTTP 429') as caught:
+            google_route(Point(1,2),Point(3,4),api_key='test-only-secret',opener=opener)
+        self.assertTrue(body.closed)
+        self.assertNotIn('test-only-secret',str(caught.exception))
+
     def test_no_routes_and_bad_durations(self):
         for value in [{"routes": []}, {"routes": [{"distanceMeters": 10, "duration": "NaNs"}]}]:
             with self.assertRaises(ValueError):

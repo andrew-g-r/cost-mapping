@@ -17,6 +17,8 @@ class RequestBudget:
 
 
 def round_trip(origin, destination, provider, *, budget):
+    if budget.limit - budget.used < 2:
+        raise ValueError('Round trip requires two remaining requests; no request was sent')
     outbound = budget.call(provider, origin, destination)
     inbound = budget.call(provider, destination, origin)
     return Route(

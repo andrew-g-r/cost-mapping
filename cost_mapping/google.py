@@ -59,6 +59,7 @@ def google_route(
                 raise ValueError("Routing response exceeds 2 MB")
             return parse_response(json.loads(payload))
     except HTTPError as error:
+        error.close()
         raise ValueError(
             f"Google Routes returned HTTP {error.code}; check API access, billing and quota"
         ) from None
