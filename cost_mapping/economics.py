@@ -43,9 +43,9 @@ def evaluate(gig, assumptions=None):
     expenses = vehicle + gig.tolls + gig.parking
     net = gig.payout - expenses
     hours = minutes / 60
-    finite(hours, 'total hours')
+    finite(hours, "total hours")
     if hours <= 0:
-        raise ValueError('Total duration is too small to calculate hourly earnings')
+        raise ValueError("Total duration is too small to calculate hourly earnings")
     hourly = net / hours
     time_value = hours * assumptions.target_hourly
     minimum_payout = expenses + time_value

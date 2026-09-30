@@ -71,6 +71,9 @@ Plotting uses Matplotlib 3.11.2+; PNG, SVG and PDF output are supported. The rem
 All report commands support `--output` and `--force`; existing files are protected by default. See `examples/gigs.csv` for the CSV input schema. JSON surfaces declare their schema version, units, source, and bounds.
 
 ```sh
+python3 -m pip install -r requirements-dev.txt
+ruff check .
+ruff format --check .
 python3 -m unittest discover -s tests -v
 python3 -m pip wheel --no-deps . -w dist
 ```

@@ -17,12 +17,12 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(result.meters, 30)
 
     def test_round_trip_rejects_insufficient_budget_before_any_call(self):
-        calls=[]
-        budget=RequestBudget(1)
+        calls = []
+        budget = RequestBudget(1)
         with self.assertRaises(ValueError):
-            round_trip('home','job',lambda *args:calls.append(args),budget=budget)
-        self.assertEqual(calls,[])
-        self.assertEqual(budget.used,0)
+            round_trip("home", "job", lambda *args: calls.append(args), budget=budget)
+        self.assertEqual(calls, [])
+        self.assertEqual(budget.used, 0)
 
     def test_failed_requests_also_count_toward_budget(self):
         budget = RequestBudget(1)

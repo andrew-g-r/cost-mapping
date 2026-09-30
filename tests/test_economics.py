@@ -22,9 +22,9 @@ class EconomicsTests(unittest.TestCase):
 
     def test_underflow_and_combined_cost_overflow_are_rejected(self):
         with self.assertRaises(ValueError):
-            evaluate(Gig('Tiny',1,1,5e-324))
+            evaluate(Gig("Tiny", 1, 1, 5e-324))
         with self.assertRaises(ValueError):
-            evaluate(Gig('Huge',1e308,1,60),Assumptions(1e308,1e308))
+            evaluate(Gig("Huge", 1e308, 1, 60), Assumptions(1e308, 1e308))
 
     def test_overflow_is_reported_instead_of_serialized(self):
         with self.assertRaises(ValueError):
