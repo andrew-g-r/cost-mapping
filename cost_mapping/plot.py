@@ -18,6 +18,7 @@ def plot_surface(surface, output, *, kind="heatmap"):
     longitude, latitude = np.meshgrid(grid.longitudes, grid.latitudes)
     values = np.asarray(surface.values)
     figure = plt.figure(figsize=(9, 6), layout="constrained")
+    figure.get_layout_engine().set(rect=(0, 0.06, 1, 0.94))
     try:
         if kind == "surface":
             axis = figure.add_subplot(111, projection="3d")
